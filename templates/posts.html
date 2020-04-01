@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Posts</title>
+{% endblock %}
+
+{% block body %}
+<br>
+<div>
+  <h1 style="display:inline">All posts</h1>
+  <a style="display:inline" class="btn btn-success float-right" href='/posts/new'>+ New Post</a>
+</div>
+
+<hr>
+
+  {% for post in posts %}
+    <br>
+    <h2>{{ post.title }}</h2>
+
+    {% if post.author %}
+      <small>Written by: {{ post.author }} on {{ post.date_posted }}</small>
+      <br><br>
+    {% else %}
+      <small>Written by: N/A on {{ post.date_posted }}</small>
+      <br><br>
+    {% endif %}
+
+    <p style="white-space:pre-wrap">{{ post.content }}</p> <!-- the style "pre"-serve wrapping, allows paragraphs to be rendered on posts page -->
+
+    <a class="btn btn-primary" href='/posts/edit/{{post.id}}'>Edit</a>
+    <a class="btn btn-danger" href='/posts/delete/{{post.id}}'>Delete</a> <!--Jinja syntax to fetch post id to be deleted -->
+    <br>
+  {% endfor %}
+
+{% endblock %}

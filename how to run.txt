@@ -1,0 +1,7 @@
+cd to directory
+
+Run:
+	venv\Scripts\activate
+
+Run:
+	python -m flask run
