@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Register</title>
+{% endblock %}
+
+{% block body %}
+
+<div>
+    <form action="" method="POST"> <!-- it'll post the action onto the same route we're already on -->
+        {{ form.hidden_tag() }} <!-- adds a CSRF token (Cross Site Request Forgery) to protect against attacks -->
+        <fieldset class="form-group"> <!-- Bootstrap stuff to make it look nicer -->
+            <legend class="border-bottom mb-4">Register today</legend> <!-- border at bottom with margin 4-->
+            <div class="form-group">
+                {{ form.username.label(class="form-control-label") }} <!-- Prints label for our username field. The class stuff in parenthesis is just Bootstrap-->
+                
+                {% if form.username.errors %} <!-- error found in form input -->
+                    {{ form.username(class="form-control form-control-lg is-invalid") }} <!-- show a form input box with Bootstrap is-invalid style-->
+                    <div class="invalid-feedback"> <!-- Bootstrap style -->
+                        {% for error in form.username.errors %} <!-- iterate and render all the errors -->
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>           
+                {% else %}
+                    {{ form.username(class="form-control form-control-lg") }} <!-- renders the actual field for our username, plus some Bootstrap-->
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label(class="form-control-label") }} <!-- these fields, like email, correspond to the variables set in our forms.py -->
+                {% if form.email.errors %} <!-- error found in form input -->
+                    {{ form.email(class="form-control form-control-lg is-invalid") }} <!-- show a form input box with Bootstrap is-invalid style-->
+                    <div class="invalid-feedback"> <!-- Bootstrap style -->
+                        {% for error in form.email.errors %} <!-- iterate and render all the errors -->
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>           
+                {% else %}
+                    {{ form.email(class="form-control form-control-lg") }} <!-- renders the actual field for our username, plus some Bootstrap-->
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label(class="form-control-label") }}
+                {% if form.password.errors %} <!-- error found in form input -->
+                    {{ form.password(class="form-control form-control-lg is-invalid") }} <!-- show a form input box with Bootstrap is-invalid style-->
+                    <div class="invalid-feedback"> <!-- Bootstrap style -->
+                        {% for error in form.password.errors %} <!-- iterate and render all the errors -->
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>           
+                {% else %}
+                    {{ form.password(class="form-control form-control-lg") }} <!-- renders the actual field for our username, plus some Bootstrap-->
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.confirm_password.label(class="form-control-label") }}
+                {% if form.confirm_password.errors %} <!-- error found in form input -->
+                    {{ form.confirm_password(class="form-control form-control-lg is-invalid") }} <!-- show a form input box with Bootstrap is-invalid style-->
+                    <div class="invalid-feedback"> <!-- Bootstrap style -->
+                        {% for error in form.confirm_password.errors %} <!-- iterate and render all the errors -->
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>           
+                {% else %}
+                    {{ form.confirm_password(class="form-control form-control-lg") }} <!-- renders the actual field for our username, plus some Bootstrap-->
+                {% endif %}
+            </div>
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }} <!-- our submit button styled with Bootstrap "Info" button style + an outline -->
+            
+        </div>
+    </form>
+</div>
+<div class="border-top pt-3">
+    <small class="text-muted">
+        Already have an account? <a class="ml-2" href="{{ url_for('login') }}">Login</a>
+    </small>
+</div>
+<br>
+<a href="url_for('posts')">Go Back</a>
+<hr>
+{% endblock %}

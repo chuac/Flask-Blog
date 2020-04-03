@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, redirect #import flask library that we installed. render_template helps use templates
+from flask import Flask, render_template, request, redirect, url_for, flash #import flask library that we installed. render_template helps use templates
+from forms import RegistrationForm, LoginForm #from the forms.py that we created
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 #vid 1:22:59
 app = Flask(__name__) # create a flask app
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy(app)
+
+app.config['SECRET_KEY'] = '17e7dd8d7afca3977c38e1a69a07ab45' #added secret key to help with secure cookies with user logins
 
 class BlogPost(db.Model): #each class variable is considered a piece of data in your database
     id = db.Column(db.Integer, primary_key = True)
@@ -42,7 +45,7 @@ def posts():
         new_post = BlogPost(title = post_title, content = post_content, author = post_author)
         db.session.add(new_post) #add to db in this session
         db.session.commit() #now saved permanently in the db
-        return redirect('/posts')
+        return redirect(url_for('posts'))
     else:
         all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
         return render_template('posts.html', posts = all_posts) #you will have access in html to this posts variable
@@ -52,7 +55,7 @@ def delete(id):
     post = BlogPost.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
-    return redirect('/posts')
+    return redirect(url_for('posts'))
 
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
@@ -65,7 +68,7 @@ def edit(id):
         post.author = request.form['author']
         post.content = request.form['content']
         db.session.commit()
-        return redirect('/posts')
+        return redirect(url_for('posts'))
     else:
         return render_template('edit.html', post = post) #sending over the post we are editing to the html side, as variable: post
 
@@ -78,9 +81,30 @@ def new_post():
         new_post = BlogPost(title = post_title, content = post_content, author = post_author)
         db.session.add(new_post) #add to db in this session
         db.session.commit() #now saved permanently in the db
-        return redirect('/posts')
+        return redirect(url_for('posts'))
     else:
         return render_template('new_post.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit(): # validate POST data
+        flash(f"Account created for {form.username.data}!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
+        return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
+    return render_template('register.html', form = form)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit(): # validate POST data
+        if form.email.data == 'admin@blog.com' and form.password.data == 'pass':
+            flash(f"Login successful!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
+            return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
+        else:
+            flash(f"Login unsuccessful. Please check email and password", 'danger')
+        #flash(f"Login successful for {form.username.data}!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
+        #return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
+    return render_template('login.html', form = form)
 
 
 @app.route('/home2')
