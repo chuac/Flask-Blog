@@ -4,10 +4,35 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 #vid 1:22:59
 app = Flask(__name__) # create a flask app
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 
 app.config['SECRET_KEY'] = '17e7dd8d7afca3977c38e1a69a07ab45' #added secret key to help with secure cookies with user logins
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable = False) #max length 20, must be unique
+    email = db.Column(db.String(120), unique=True, nullable = False)
+    image_file = db.Column(db.String(20), nullable = False, default='default.jpg') #length 20 because it'll hold the hash of their image
+    password = db.Column(db.String(60), nullable = False)
+    posts = db.relationship('Post', backref = 'author', lazy = True) # relationship, not a column!
+    # (One to many) relationship to the 'Post' class which explains the capitalisation. 
+    # Pretend like the backref is adding another column to the Post model/class. Allows access like for a post's 'author' attribute
+    # lazy attribute asks SQLAlchemy to load all the posts a user has relationship to, all at once.
+
+    def __repr__(self): #how your object is printed when it is printed out
+        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(100), nullable = False) #cant be null, must exist
+    content = db.Column(db.Text, nullable = False)
+    date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) # relates to the 'id' column of 'user' table (which explains the lowercase 'user')
+
+    def __repr__(self):
+        return f"Blog post('{self.title}', '{self.author.username}', '{self.date_posted}')"
 
 class BlogPost(db.Model): #each class variable is considered a piece of data in your database
     id = db.Column(db.Integer, primary_key = True)
@@ -17,7 +42,8 @@ class BlogPost(db.Model): #each class variable is considered a piece of data in 
     date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
 
     def __repr__(self):
-        return 'Blog post ' + str(self.id)
+        return f"Blog post('{self.title}', '{self.author}', '{self.date_posted}')"
+        #return 'Blog post ' + str(self.id) #from CleverProgramming
 
 all_posts = [ #dummy data
     {
