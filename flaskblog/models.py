@@ -1,8 +1,14 @@
 from datetime import datetime
-from flaskblog import db
+from flaskblog import db, login_manager
+from flask_login import UserMixin #login manager needs this
 
 
-class User(db.Model):
+@login_manager.user_loader #login manager needs this
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable = False) #max length 20, must be unique
     email = db.Column(db.String(120), unique=True, nullable = False)
@@ -16,6 +22,7 @@ class User(db.Model):
     def __repr__(self): #how your object is printed when it is printed out
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(100), nullable = False) #cant be null, must exist
@@ -25,6 +32,7 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Blog post('{self.title}', '{self.author.username}', '{self.date_posted}')"
+
 
 class BlogPost(db.Model): #each class variable is considered a piece of data in your database
     id = db.Column(db.Integer, primary_key = True)

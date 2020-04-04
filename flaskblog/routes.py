@@ -1,7 +1,8 @@
 from flask import render_template, request, redirect, url_for, flash # render_template helps use templates
-from flaskblog import app
+from flaskblog import app, db, bcrypt # importing from our package, __init__.py
 from flaskblog.forms import RegistrationForm, LoginForm #from the forms.py that we created
 from flaskblog.models import User, Post
+from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route('/') #define a route and code to run. this route would be at our base url. like base google.com
 def index():
@@ -59,24 +60,44 @@ def new_post():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated: # user is already logged in, no need to show them register page
+        return redirect(url_for('posts'))
     form = RegistrationForm()
     if form.validate_on_submit(): # validate POST data
-        flash(f"Account created for {form.username.data}!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
-        return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash(f"Account created for {form.username.data}! You are now able to log in", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
+        return redirect(url_for('login')) # is a valid form so now we redirect to posts page
     return render_template('register.html', form = form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated: # user is already logged in, no need to show them login page
+        return redirect(url_for('posts'))
     form = LoginForm()
     if form.validate_on_submit(): # validate POST data
-        if form.email.data == 'admin@blog.com' and form.password.data == 'pass':
-            flash(f"Login successful!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
-            return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
+        user = User.query.filter_by(email=form.email.data).first() # retrieve a user in db that has same email as entered into the form
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next') # capture what page the user was trying to visit before we asked them to login
+            return redirect(next_page) if next_page else redirect(url_for('posts'))
         else:
             flash(f"Login unsuccessful. Please check email and password", 'danger')
         #flash(f"Login successful for {form.username.data}!", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
         #return redirect(url_for('posts')) # is a valid form so now we redirect to posts page
-    return render_template('login.html', form = form)
+    return render_template('login.html', form = form) # login unsuccessful so just return them to login page
+
+@app.route('/logout')
+def logout():
+    logout_user() # imported this above, from flask_login
+    return redirect(url_for('index'))
+
+@app.route('/account')
+@login_required # flask_login functionality. need to tell login_manager in __init__.py where our login route is
+def account():
+    return render_template('account.html', title='Account')
 
 
 @app.route('/home2')
