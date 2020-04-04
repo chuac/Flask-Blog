@@ -28,7 +28,7 @@ def posts():
 
 @app.route('/posts/delete/<int:id>')
 def delete(id):
-    post = BlogPost.query.get_or_404(id)
+    post = Post.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
     return redirect(url_for('posts'))
@@ -36,12 +36,12 @@ def delete(id):
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
 
-    post = BlogPost.query.get_or_404(id)
+    post = Post.query.get_or_404(id)
 
     if request.method == 'POST':
         #post = BlogPost.query.get_or_404(id)
         post.title = request.form['title']
-        post.author = request.form['author']
+        #post.author = request.form['author']
         post.content = request.form['content']
         db.session.commit()
         return redirect(url_for('posts'))
@@ -49,12 +49,13 @@ def edit(id):
         return render_template('edit.html', post = post) #sending over the post we are editing to the html side, as variable: post
 
 @app.route('/posts/new', methods=['GET', 'POST'])
+@login_required
 def new_post():
     if request.method == 'POST':
         post_title = request.form['title']
-        post_author = request.form['author']
+        post_author = current_user.id
         post_content = request.form['content']
-        new_post = BlogPost(title = post_title, content = post_content, author = post_author)
+        new_post = Post(title = post_title, content = post_content, user_id = post_author)
         db.session.add(new_post) #add to db in this session
         db.session.commit() #now saved permanently in the db
         return redirect(url_for('posts'))
@@ -97,7 +98,7 @@ def logout():
     logout_user() # imported this above, from flask_login
     return redirect(url_for('index'))
 
-
+# future improvements: check if picture with name of the random hex already exists in db. Unlikely but could cause issues
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8) # generate random hex so we don't store pics under the name the user uploaded with
     f_name, f_ext = os.path.splitext(form_picture.filename) # grab the file extension though, we need that. Python convention would be to name the name part of the split string "_" since it is not used
