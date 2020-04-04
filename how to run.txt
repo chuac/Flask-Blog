@@ -4,4 +4,15 @@ Run:
 	venv\Scripts\activate
 
 Run:
-	python -m flask run
+	python -m run run
+	          ^ file name
+__
+
+Creating db
+
+At root of project folder:
+
+Enter:
+	python
+	from flaskblog.models import User, Post
+	db.create_all()

@@ -2,3 +2,5 @@ venv
 flask
 .vscode
 __pycache__
+
+posts.db

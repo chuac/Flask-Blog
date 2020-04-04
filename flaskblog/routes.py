@@ -1,61 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash #import flask library that we installed. render_template helps use templates
-from forms import RegistrationForm, LoginForm #from the forms.py that we created
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-#vid 1:22:59
-app = Flask(__name__) # create a flask app
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-db = SQLAlchemy(app)
-
-app.config['SECRET_KEY'] = '17e7dd8d7afca3977c38e1a69a07ab45' #added secret key to help with secure cookies with user logins
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable = False) #max length 20, must be unique
-    email = db.Column(db.String(120), unique=True, nullable = False)
-    image_file = db.Column(db.String(20), nullable = False, default='default.jpg') #length 20 because it'll hold the hash of their image
-    password = db.Column(db.String(60), nullable = False)
-    posts = db.relationship('Post', backref = 'author', lazy = True) # relationship, not a column!
-    # (One to many) relationship to the 'Post' class which explains the capitalisation. 
-    # Pretend like the backref is adding another column to the Post model/class. Allows access like for a post's 'author' attribute
-    # lazy attribute asks SQLAlchemy to load all the posts a user has relationship to, all at once.
-
-    def __repr__(self): #how your object is printed when it is printed out
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(100), nullable = False) #cant be null, must exist
-    content = db.Column(db.Text, nullable = False)
-    date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) # relates to the 'id' column of 'user' table (which explains the lowercase 'user')
-
-    def __repr__(self):
-        return f"Blog post('{self.title}', '{self.author.username}', '{self.date_posted}')"
-
-class BlogPost(db.Model): #each class variable is considered a piece of data in your database
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(100), nullable = False) #cant be null, must exist
-    content = db.Column(db.Text, nullable = False)
-    author = db.Column(db.String(20), nullable = False, default = "N/A")
-    date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
-
-    def __repr__(self):
-        return f"Blog post('{self.title}', '{self.author}', '{self.date_posted}')"
-        #return 'Blog post ' + str(self.id) #from CleverProgramming
-
-all_posts = [ #dummy data
-    {
-        'title': 'Post 1',
-        'content': 'This is the content of post 1. Blah',
-        'author': 'Chris'
-    },
-    {
-        'title': 'Post 2',
-        'content': 'This is the content of post 2. Bleh'
-    }
-]
+from flask import render_template, request, redirect, url_for, flash # render_template helps use templates
+from flaskblog import app
+from flaskblog.forms import RegistrationForm, LoginForm #from the forms.py that we created
+from flaskblog.models import User, Post
 
 @app.route('/') #define a route and code to run. this route would be at our base url. like base google.com
 def index():
@@ -66,14 +12,14 @@ def posts():
 
     if request.method == 'POST':
         post_title = request.form['title']
-        post_author = request.form['author']
+        #post_author = request.form['author']
         post_content = request.form['content']
-        new_post = BlogPost(title = post_title, content = post_content, author = post_author)
+        new_post = BlogPost(title = post_title, content = post_content, user_id = "999")
         db.session.add(new_post) #add to db in this session
         db.session.commit() #now saved permanently in the db
         return redirect(url_for('posts'))
     else:
-        all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+        all_posts = Post.query.order_by(Post.date_posted).all()
         return render_template('posts.html', posts = all_posts) #you will have access in html to this posts variable
 
 @app.route('/posts/delete/<int:id>')
@@ -145,6 +91,3 @@ def hi(name, id):
 @app.route('/onlyget', methods=['GET']) #only allow GET requests
 def get_only():
     return 'You can only GET this webpage'
-
-if __name__ == "__main__":
-    app.run(debug=True)
