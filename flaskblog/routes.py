@@ -3,6 +3,9 @@ from flaskblog import app, db, bcrypt # importing from our package, __init__.py
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm #from the forms.py that we created
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
+from PIL import Image # to resize images users upload before saving
+import secrets
+import os
 
 @app.route('/') #define a route and code to run. this route would be at our base url. like base google.com
 def index():
@@ -94,11 +97,30 @@ def logout():
     logout_user() # imported this above, from flask_login
     return redirect(url_for('index'))
 
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8) # generate random hex so we don't store pics under the name the user uploaded with
+    f_name, f_ext = os.path.splitext(form_picture.filename) # grab the file extension though, we need that. Python convention would be to name the name part of the split string "_" since it is not used
+    new_pic_name = random_hex + f_ext # concatenate the new hex plus the file extension
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', new_pic_name)
+
+    #form_picture.save(picture_path) # we no longer want this to save all pictures at any size the users upload to the server
+
+    output_size = (125, 125) # our css would resize pics to 125x125px anyways
+    img = Image.open(form_picture) # Image is imported from Pillow (PIL) library
+    img.thumbnail(output_size)
+    img.save(picture_path)
+
+    return new_pic_name
+
 @app.route('/account', methods=['GET', 'POST'])
 @login_required # flask_login functionality. need to tell login_manager in __init__.py where our login route is
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        if form.picture.data: # user submitted/uploaded a picture
+            picture_file_path = save_picture(form.picture.data)
+            current_user.image_file = picture_file_path
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
