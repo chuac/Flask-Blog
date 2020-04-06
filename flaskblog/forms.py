@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed # to allow user to upload
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import current_user # check current user that is updating their account
 from flaskblog.models import User # helps validating fields. need to check if user exists in db, etc
@@ -61,6 +61,12 @@ class UpdateAccountForm(FlaskForm):
 
             if email: # that email already exists in db
                 raise ValidationError('That email is taken. Please choose a different one.') 
+
+
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Submit Post')
 
 
 

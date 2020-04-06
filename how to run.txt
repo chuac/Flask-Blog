@@ -16,3 +16,11 @@ Enter:
 	python
 	from flaskblog.models import User, Post
 	db.create_all()
+
+
+
+chris@demo.com
+pass
+
+test@test.com
+test

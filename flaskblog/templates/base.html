@@ -6,6 +6,12 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}"
     
+    {% if title %}
+        <title>Flask Blog - {{ title }}</title>
+    {% else %}
+        <title>Flask Blog</title>
+    {% endif %}
+
     {% block head %} {% endblock %}
   </head>
   <body>

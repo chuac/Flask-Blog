@@ -1,35 +1,34 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Posts</title>
+<title></title>
 {% endblock %}
 
 {% block body %}
 <br>
 <div>
   <h1 style="display:inline">All posts</h1>
+  {% if current_user.is_authenticated %}
   <a style="display:inline" class="btn btn-success float-right" href='/posts/new'>+ New Post</a>
+  {% endif %}
 </div>
 
 <hr>
 
-  {% for post in posts %}
-    <br>
-    <h2>{{ post.title }}</h2>
+{% for post in posts %}
 
-    {% if post.author %}
-      <small>Written by: {{ post.author.username }} on {{ post.date_posted }}</small>
-      <br><br>
-    {% else %}
-      <small>Written by: N/A on {{ post.date_posted }}</small>
-      <br><br>
-    {% endif %}
-
-    <p style="white-space:pre-wrap">{{ post.content }}</p> <!-- the style "pre"-serve wrapping, allows paragraphs to be rendered on posts page -->
-
-    <a class="btn btn-primary" href='/posts/edit/{{post.id}}'>Edit</a>
-    <a class="btn btn-danger" href='/posts/delete/{{post.id}}'>Delete</a> <!--Jinja syntax to fetch post id to be deleted -->
-    <br>
-  {% endfor %}
+<article class="media content-section">
+  <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"> <!-- user's display pic next to their post  -->
+  <div class="media-body">
+    <div class="article-metadata">
+      <a class="mr-2" href="#">{{ post.author.username }}</a> 
+      <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small> <!--  date posted, trimmed to Year, month, date -->
+    </div>
+    <h2><a class="article-title" href="{{ url_for('post', id = post.id) }}">{{ post.title }}</a></h2> <!-- the article/post title is now a link to a page just for that post (allows the author to edit/delete on that page)  -->
+    <p class="article-content">{{ post.content }}</p>
+  </div>
+</article>
+    
+{% endfor %}
 
 {% endblock %}

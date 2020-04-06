@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash # render_template helps use templates
 from flaskblog import app, db, bcrypt # importing from our package, __init__.py
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm #from the forms.py that we created
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm #from the forms.py that we created
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 from PIL import Image # to resize images users upload before saving
@@ -24,16 +24,47 @@ def posts():
         return redirect(url_for('posts'))
     else:
         all_posts = Post.query.order_by(Post.date_posted).all()
-        return render_template('posts.html', posts = all_posts) #you will have access in html to this posts variable
+        return render_template('posts.html', posts = all_posts, title = "Posts") #you will have access in html to this posts variable
 
-@app.route('/posts/delete/<int:id>')
+@app.route('/post/<int:id>') # View a singular post. Corey Schafer new post style.
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', title = post.title, post = post)
+
+@app.route('/posts/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_post(id):
+    post = Post.query.get_or_404(id)
+    db.session.delete(post)
+    db.session.commit()
+    return redirect(url_for('posts'))
+
+@app.route('/posts/delete/<int:id>') # no longer used
 def delete(id):
     post = Post.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
     return redirect(url_for('posts'))
 
-@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/posts/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(id):
+    form = PostForm()
+    post = Post.query.get_or_404(id)
+    if post.author != current_user: # the current user logged in is not the author of this post, therefore not allowed to update. throw 403 Forbidden
+        abort(403) 
+    if form.validate_on_submit(): # user submitted valid updated post
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash('Your post has been updated!', 'success')
+        return redirect(url_for('post', id = post.id))
+    elif request.method == 'GET': # user just visited the edit page of their post so we populate the field with the current post's data
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template('edit.html', title = 'Update Post', form = form)
+
+@app.route('/posts/edit/<int:id>', methods=['GET', 'POST']) # no longer used
 def edit(id):
 
     post = Post.query.get_or_404(id)
@@ -46,21 +77,20 @@ def edit(id):
         db.session.commit()
         return redirect(url_for('posts'))
     else:
-        return render_template('edit.html', post = post) #sending over the post we are editing to the html side, as variable: post
+        return render_template('edit.html', title = post.title, post = post) #sending over the post we are editing to the html side, as variable: post
 
 @app.route('/posts/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
-    if request.method == 'POST':
-        post_title = request.form['title']
-        post_author = current_user.id
-        post_content = request.form['content']
-        new_post = Post(title = post_title, content = post_content, user_id = post_author)
-        db.session.add(new_post) #add to db in this session
-        db.session.commit() #now saved permanently in the db
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title = form.title.data, content = form.content.data, user_id = current_user.id)
+        db.session.add(post)
+        db.session.commit()
+        flash("New post created", 'success')
         return redirect(url_for('posts'))
     else:
-        return render_template('new_post.html')
+        return render_template('new_post.html', title = 'New Post', form = form)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
