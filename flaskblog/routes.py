@@ -11,20 +11,10 @@ import os
 def index():
     return render_template('index.html')
 
-@app.route('/posts', methods = ['GET', 'POST']) #already GET by default but now we want to allow POST too
+@app.route('/posts') #already GET by default but now we want to allow POST too
 def posts():
-
-    if request.method == 'POST':
-        post_title = request.form['title']
-        #post_author = request.form['author']
-        post_content = request.form['content']
-        new_post = BlogPost(title = post_title, content = post_content, user_id = "999")
-        db.session.add(new_post) #add to db in this session
-        db.session.commit() #now saved permanently in the db
-        return redirect(url_for('posts'))
-    else:
-        all_posts = Post.query.order_by(Post.date_posted).all()
-        return render_template('posts.html', posts = all_posts, title = "Posts") #you will have access in html to this posts variable
+    all_posts = Post.query.order_by(Post.date_posted).all()
+    return render_template('posts.html', posts = all_posts, title = "Posts") #you will have access in html to this posts variable
 
 @app.route('/post/<int:id>') # View a singular post. Corey Schafer new post style.
 def post(id):
@@ -34,13 +24,6 @@ def post(id):
 @app.route('/posts/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_post(id):
-    post = Post.query.get_or_404(id)
-    db.session.delete(post)
-    db.session.commit()
-    return redirect(url_for('posts'))
-
-@app.route('/posts/delete/<int:id>') # no longer used
-def delete(id):
     post = Post.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
@@ -63,21 +46,6 @@ def edit_post(id):
         form.title.data = post.title
         form.content.data = post.content
     return render_template('edit.html', title = 'Update Post', form = form)
-
-@app.route('/posts/edit/<int:id>', methods=['GET', 'POST']) # no longer used
-def edit(id):
-
-    post = Post.query.get_or_404(id)
-
-    if request.method == 'POST':
-        #post = BlogPost.query.get_or_404(id)
-        post.title = request.form['title']
-        #post.author = request.form['author']
-        post.content = request.form['content']
-        db.session.commit()
-        return redirect(url_for('posts'))
-    else:
-        return render_template('edit.html', title = post.title, post = post) #sending over the post we are editing to the html side, as variable: post
 
 @app.route('/posts/new', methods=['GET', 'POST'])
 @login_required
@@ -162,17 +130,3 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file) # find user's image file then concatenate the path to it, to be passed off to template
     return render_template('account.html', title='Account', image_file = image_file, form = form)
-
-
-@app.route('/home2')
-@app.route('/home') #the method below is closest to this route and therefore two routes can share one method.
-def hello():
-    return "Hello World"
-
-@app.route('/home/users/<string:name>/posts/<int:id>') #handle multiple URLs with one function. "Dynamic URLs"
-def hi(name, id):
-    return "Hello, " + name + " your id is " + str(id)
-
-@app.route('/onlyget', methods=['GET']) #only allow GET requests
-def get_only():
-    return 'You can only GET this webpage'
