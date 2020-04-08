@@ -55,7 +55,7 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email): # to help validate if email already exists in db.
-        if email.data != current_user.email:
+        if email.data != current_user.email: # since the user doesn't HAVE to change their email, checking if form's email is different to current user's email then only checking db
 
             email = User.query.filter_by(email = email.data).first()
 
@@ -69,21 +69,20 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit Post')
 
 
+class RequestResetForm(FlaskForm):
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+    def validate_email(self, email): # to help validate if email already exists in db.
+        user = User.query.filter_by(email = email.data).first() # query db to find an account with user's email
+
+        if user is None: # that email doesn't exist in the db
+            raise ValidationError('There is no account with that email. Please register first.') 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', 
+                                    validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')

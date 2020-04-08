@@ -1,5 +1,6 @@
 from datetime import datetime
-from flaskblog import db, login_manager
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from flaskblog import db, login_manager, app
 from flask_login import UserMixin #login manager needs this
 
 
@@ -18,6 +19,19 @@ class User(db.Model, UserMixin):
     # (One to many) relationship to the 'Post' class which explains the capitalisation. 
     # Pretend like the backref is adding another column to the Post model/class. Allows access like for a post's 'author' attribute
     # lazy attribute asks SQLAlchemy to load all the posts a user has relationship to, all at once.
+
+    def get_reset_token(self, expires_sec = 1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8') # create a token with payload of user_id, expires in 1800secs
+
+    @staticmethod # to tell Python not to expect a self variable.
+    def verify_reset_token(token): # takes a token as argument
+        s = Serializer(app.config['SECRET_KEY']) # creates Serializer
+        try: # try to load the token
+            user_id = s.loads(token)['user_id']
+        except: # if fail to load token, we catch the exception and return None
+            return None
+        return User.query.get(user_id) # successfully loaded token so now we return the User with that user_id
 
     def __repr__(self): #how your object is printed when it is printed out
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"

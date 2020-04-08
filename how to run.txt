@@ -19,8 +19,12 @@ Enter:
 
 
 
-chris@demo.com
+chris@demo.com <-- now changed to my real hotmail email
 pass
 
 test@test.com
 test
+
+
+db.drop_all()
+db.create_all()
