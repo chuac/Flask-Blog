@@ -9,7 +9,7 @@
     <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"> <!-- User's profile picture -->
     <div class="media-body">
       <div class="article-metadata">
-        <a class="mr-2" href="#">{{ post.author.username }}</a>
+        <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
         <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small> <!-- Date posted, showing only Year, month, date. Google strftime for more methods -->
         {% if post.author == current_user %} <!-- person viewing this post is the author so we will show them update and delete options -->
           <div>

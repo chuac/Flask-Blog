@@ -11,10 +11,12 @@ import os
 def index():
     return render_template('index.html')
 
-@app.route('/posts') #already GET by default but now we want to allow POST too
+@app.route('/posts')
 def posts():
-    all_posts = Post.query.order_by(Post.date_posted).all()
-    return render_template('posts.html', posts = all_posts, title = "Posts") #you will have access in html to this posts variable
+    #all_posts = Post.query.order_by(Post.date_posted).all()
+    page = request.args.get('page', 1, type = int) # look for optional parameter in GET request, default to 1, of type int
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page = page, per_page = 5) # enter page requested into our paginate query on the Post model
+    return render_template('posts.html', posts = posts, title = "Posts") #you will have access in html to this posts variable
 
 @app.route('/post/<int:id>') # View a singular post. Corey Schafer new post style.
 def post(id):
@@ -130,3 +132,13 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file) # find user's image file then concatenate the path to it, to be passed off to template
     return render_template('account.html', title='Account', image_file = image_file, form = form)
+
+@app.route('/user/<string:username>') # show all the posts for a specific user
+def user_posts(username):
+    page = request.args.get('page', 1, type = int) # look for optional parameter in GET request, default to 1, of type int
+    user = User.query.filter_by(username = username).first_or_404() # using the username variable passed to us from the route, get the first query from db, otherwise return 404
+    posts = (Post.query.filter_by(author = user)
+                .order_by(Post.date_posted.desc())
+                .paginate(page = page, per_page = 5)
+            ) # parenthesis method to break apart a long line
+    return render_template('user_posts.html', posts = posts, user = user, title = "User Posts")
