@@ -28,3 +28,15 @@ test
 
 db.drop_all()
 db.create_all()
+
+__
+Set system variables
+1. Open command line as administrator
+2. setx DB_USER "my_db_user"
+(> SUCCESS: Specified value was saved.)
+3. Close and reopen command line
+4. echo %DB_USER%
+my_db_user
+
+setx DB_USER "my_db_user" will put it in the User Variables
+setx /m DB_USER "my_db_user"  will put it in the System Variables

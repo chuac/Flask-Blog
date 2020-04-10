@@ -1,6 +1,7 @@
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flaskblog import db, login_manager, app
+from flaskblog import db, login_manager # no longer importing "app", doesn't exist anymore...we now use current_app
+from flask import current_app
 from flask_login import UserMixin #login manager needs this
 
 
@@ -21,12 +22,12 @@ class User(db.Model, UserMixin):
     # lazy attribute asks SQLAlchemy to load all the posts a user has relationship to, all at once.
 
     def get_reset_token(self, expires_sec = 1800):
-        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8') # create a token with payload of user_id, expires in 1800secs
 
     @staticmethod # to tell Python not to expect a self variable.
     def verify_reset_token(token): # takes a token as argument
-        s = Serializer(app.config['SECRET_KEY']) # creates Serializer
+        s = Serializer(current_app.config['SECRET_KEY']) # creates Serializer
         try: # try to load the token
             user_id = s.loads(token)['user_id']
         except: # if fail to load token, we catch the exception and return None

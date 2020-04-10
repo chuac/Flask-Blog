@@ -1,4 +1,7 @@
-from flaskblog import app # the app variable MUST exist in __init__.py inside flaskblog package
+from flaskblog import create_app # create_app function from __init__py
+
+
+app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)

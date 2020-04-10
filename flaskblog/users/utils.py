@@ -1,9 +1,9 @@
 import os
 import secrets
 from PIL import Image
-from flask import url_for
+from flask import url_for, current_app
 from flask_mail import Message
-from flaskblog import app, mail
+from flaskblog import mail # no longer importing "app", using current_app as imported above
 
 
 # for all the functions that were previously in flaskblog.routes.py but relate to users
@@ -13,7 +13,7 @@ def save_picture(form_picture):
     random_hex = secrets.token_hex(8) # generate random hex so we don't store pics under the name the user uploaded with
     f_name, f_ext = os.path.splitext(form_picture.filename) # grab the file extension though, we need that. Python convention would be to name the name part of the split string "_" since it is not used
     new_pic_name = random_hex + f_ext # concatenate the new hex plus the file extension
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', new_pic_name)
+    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', new_pic_name)
 
     #form_picture.save(picture_path) # we no longer want this to save all pictures at any size the users upload to the server
 
