@@ -9,11 +9,11 @@
     <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"> <!-- User's profile picture -->
     <div class="media-body">
       <div class="article-metadata">
-        <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+        <a class="mr-2" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
         <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small> <!-- Date posted, showing only Year, month, date. Google strftime for more methods -->
         {% if post.author == current_user %} <!-- person viewing this post is the author so we will show them update and delete options -->
           <div>
-            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('edit_post', id = post.id) }}">Edit</a>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('posts.edit_post', id = post.id) }}">Edit</a>
             <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button> <!-- Modal code copied straight from Bootstrap website-->
           </div>
         {% endif %}
@@ -34,7 +34,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <form action="{{ url_for('delete_post', id = post.id) }}" method="POST"> <!-- submits a POST request to our delete route -->
+          <form action="{{ url_for('posts.delete_post', id = post.id) }}" method="POST"> <!-- submits a POST request to our delete route -->
             <input class="btn btn-danger" type="submit" value="Delete"> <!-- User selected Delete button in Modal pop-up -->
           </form>
         </div>

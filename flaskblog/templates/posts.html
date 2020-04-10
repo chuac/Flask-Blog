@@ -21,10 +21,10 @@
   <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"> <!-- user's display pic next to their post  -->
   <div class="media-body">
     <div class="article-metadata">
-      <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a> 
+      <a class="mr-2" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a> 
       <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small> <!--  date posted, trimmed to Year, month, date -->
     </div>
-    <h2><a class="article-title" href="{{ url_for('post', id = post.id) }}">{{ post.title }}</a></h2> <!-- the article/post title is now a link to a page just for that post (allows the author to edit/delete on that page)  -->
+    <h2><a class="article-title" href="{{ url_for('posts.post', id = post.id) }}">{{ post.title }}</a></h2> <!-- the article/post title is now a link to a page just for that post (allows the author to edit/delete on that page)  -->
     <p class="article-content">{{ post.content }}</p>
   </div>
 </article>
@@ -34,9 +34,9 @@
 {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page_num %} <!-- if page_num is not equal to None -->
     {% if posts.page == page_num %} <!-- the page num from iter_pages is equal to the current page the user is on -->
-      <a class="btn btn-info mb-4" href="{{ url_for('posts', page = page_num) }}">{{ page_num }}</a> <!-- user is on this page number so we style the link differently -->
+      <a class="btn btn-info mb-4" href="{{ url_for('posts.posts', page = page_num) }}">{{ page_num }}</a> <!-- user is on this page number so we style the link differently -->
     {% else %}
-      <a class="btn btn-outline-info mb-4" href="{{ url_for('posts', page = page_num) }}">{{ page_num }}</a> 
+      <a class="btn btn-outline-info mb-4" href="{{ url_for('posts.posts', page = page_num) }}">{{ page_num }}</a> 
     {% endif %}
   {% else %} <!-- not a page number, so we just show ellipses -->
     ...

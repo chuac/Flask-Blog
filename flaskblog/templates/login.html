@@ -45,17 +45,17 @@
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }} <!-- our submit button styled with Bootstrap "Info" button style + an outline -->
             <small class="text-muted ml-2">
-                <a href="{{ url_for('reset_request') }}">Forgot Password?</a> <!-- forgot password link, not built yet -->
+                <a href="{{ url_for('users.reset_request') }}">Forgot Password?</a> <!-- forgot password link, not built yet -->
             </small>
         </div>
     </form>
 </div>
 <div class="border-top pt-3">
     <small class="text-muted">
-        Don't have an account? <a class="ml-2" href="{{ url_for('register') }}">Register now</a>
+        Don't have an account? <a class="ml-2" href="{{ url_for('users.register') }}">Register now</a>
     </small>
 </div>
 <br>
-<a href="{{ url_for('posts') }}">Go Back</a>
+<a href="{{ url_for('posts.posts') }}">Go Back</a>
 <hr>
 {% endblock %}
