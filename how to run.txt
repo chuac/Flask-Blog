@@ -6,7 +6,11 @@ Run:
 Run:
 	python -m run run
 	          ^ file name
+
+If bash:  source flask/Scripts/activate
+
 __
+
 
 Creating db
 
