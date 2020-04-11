@@ -30,9 +30,11 @@ def create_app(config_class = Config): # the class we created in config.py as de
     from flaskblog.users.routes import users # the 'users' we are importing is the Blueprint instance initialised at the top of routes.py in th new users package
     from flaskblog.posts.routes import p as posts
     from flaskblog.main.routes import main
+    from flaskblog.errors.handlers import errors
 
     app.register_blueprint(users) # register that blueprint
     app.register_blueprint(posts)
     app.register_blueprint(main)
+    app.register_blueprint(errors)
 
     return app
