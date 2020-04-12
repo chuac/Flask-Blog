@@ -3,12 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_migrate import Migrate # to create db on Heroku
 from flaskblog.config import Config
 
 
 
 
 db = SQLAlchemy()
+migrate = Migrate()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login' # the 'login' is the function of our login route. same like using url_for. the users is the blueprint where the login route is
@@ -23,6 +25,7 @@ def create_app(config_class = Config): # the class we created in config.py as de
     app.config.from_object(Config) # from config.py
 
     db.init_app(app)
+    migrate.init_app(app, db)
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)

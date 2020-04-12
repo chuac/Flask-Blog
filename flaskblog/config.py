@@ -3,7 +3,8 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('PY_SECRET_KEY') #added secret key to help with secure cookies with user logins
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') # changed to DATABASE_URL for Heroku
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') #or 'sqlite:///site.db' # changed to DATABASE_URL for Heroku
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
