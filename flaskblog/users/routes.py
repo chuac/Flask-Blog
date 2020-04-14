@@ -14,9 +14,10 @@ def register():
     if current_user.is_authenticated: # user is already logged in, no need to show them register page
         return redirect(url_for('posts.posts'))
     form = RegistrationForm()
-    if form.validate_on_submit(): # validate POST data
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+    if form.validate_on_submit() and request.method == 'POST': # validate POST data
+        #hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        #user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        user = User(form.username.data, form.email.data, form.password.data)
         db.session.add(user)
         db.session.commit()
         flash(f"Account created for {form.username.data}! You are now able to log in", 'success') # flash message, using python f-strings. 2nd arg is a "category". 'success' is Bootstrap style
