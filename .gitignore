@@ -1,6 +1,8 @@
-venv
+venv382
 flask
 .vscode
 __pycache__
 
 posts.db
+
+requirements2.txt
