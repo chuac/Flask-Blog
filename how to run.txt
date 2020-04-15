@@ -44,3 +44,10 @@ my_db_user
 
 setx DB_USER "my_db_user" will put it in the User Variables
 setx /m DB_USER "my_db_user"  will put it in the System Variables
+_____
+heroku login
+heroku config:set FLASK_APP=run.py
+git push heroku master
+
+heroku pg:psql
+\d

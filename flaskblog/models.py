@@ -20,12 +20,15 @@ class User(db.Model, UserMixin):
     # (One to many) relationship to the 'Post' class which explains the capitalisation. 
     # Pretend like the backref is adding another column to the Post model/class. Allows access like for a post's 'author' attribute
     # lazy attribute asks SQLAlchemy to load all the posts a user has relationship to, all at once.
-
+    
     def __init__(self, username, email, plaintext_password): ## new way of initialising new user in db, simplified operations in register route (https://www.patricksoftwareblog.com/testing-a-flask-application-using-pytest/)
         self.username = username
         self.email = email
         self.image_file = 'default.jpg'
-        self.password = bcrypt.generate_password_hash(plaintext_password).decode('utf-8')
+        self.password = bcrypt.generate_password_hash(plaintext_password).decode('utf-8') # we now hash the passwords in here, instead of at routes.py
+    
+    def is_correct_password(self, plaintext_password): # user trying to log in, compare password stored in this User db object vs. function argument password (from the form)
+        return bcrypt.check_password_hash(self.password, plaintext_password)
 
     def get_reset_token(self, expires_sec = 1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -50,7 +53,12 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable = False)
     date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) # relates to the 'id' column of 'user' table (which explains the lowercase 'user')
-
+    
+    def __init__(self, title, content, user_id):
+        self.title = title
+        self.content = content
+        self.user_id = user_id
+    
     def __repr__(self):
         return f"Blog post('{self.title}', '{self.author.username}', '{self.date_posted}')"
 
