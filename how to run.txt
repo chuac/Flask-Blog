@@ -51,3 +51,8 @@ git push heroku master
 
 heroku pg:psql
 \d
+_____
+https://www.patricksoftwareblog.com/testing-a-flask-application-using-pytest/
+pytest 
+pytest -v
+pytest --setup-show

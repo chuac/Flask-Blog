@@ -4,7 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate # to create db on Heroku
-from flaskblog.config import Config
+#from flaskblog.config import Config
 
 
 
@@ -20,9 +20,9 @@ mail = Mail()
 
 
 
-def create_app(config_class = Config): # the class we created in config.py as default. we move the initialisation into here so the extensions only need to be initialised once if we wanted to use them with multiple apps
+def create_app(config_class): # the class we created in config.py as default. we move the initialisation into here so the extensions only need to be initialised once if we wanted to use them with multiple apps
     app = Flask(__name__) # create a flask app
-    app.config.from_object(Config) # from config.py
+    app.config.from_object(config_class) # from config.py
 
     db.init_app(app)
     migrate.init_app(app, db)
